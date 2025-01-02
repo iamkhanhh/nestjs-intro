@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { title } from "process";
 import { stringify } from "querystring";
 import { UsersService } from "src/users/providers/users.service";
+import { CreatePostDto } from "../dtos/createPost.dto";
 
 @Injectable()
 export class PostsService {
@@ -26,4 +27,8 @@ export class PostsService {
             }
         ]
     }
+
+    create(createPostDto: CreatePostDto) {
+        return createPostDto;
+    }   
 }
