@@ -58,9 +58,7 @@ export class UsersController {
         @Body() createUserDto: CreateUserDto
     ) {
         console.log(createUserDto)
-        console.log(typeof createUserDto)
-        console.log(createUserDto instanceof CreateUserDto)
-        return 'you send a get request to users endpoints'
+        return this.usersService.createUser(createUserDto);
     }
 
     @Patch()
