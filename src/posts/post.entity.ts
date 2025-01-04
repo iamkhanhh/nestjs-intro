@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { POST_TYPE } from "./enums/postType.enum";
 import { POST_STATUS } from "./enums/postStatus.enum";
-import { CreatePostMetaOptionsDto } from "./dtos/create-post-meta-options.dto";
+import { CreatePostMetaOptionsDto } from "../meta-options/dtos/create-post-meta-options.dto";
+import { MetaOption } from "src/meta-options/meta-option.entity";
 
 @Entity()
 export class Post {
@@ -64,15 +65,12 @@ export class Post {
     })
     publishOn?: Date;
 
-    @Column({
-        type: 'timestamp',
-        nullable: true,
-    })
     tags?: string[];
 
-    @Column({
-        type: 'json',
-        nullable: true,
+    @OneToOne(() => MetaOption, {
+        cascade: true,
+        eager: true,
     })
-    metaOptions?: CreatePostMetaOptionsDto[];
+    @JoinColumn()
+    metaOptions?: MetaOption;
 }
