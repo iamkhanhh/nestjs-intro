@@ -42,7 +42,7 @@ export class PostsController {
     updatePost(
         @Body() updatePostDto: UpdatePostDto
     ) {
-        return updatePostDto;
+        return this.postsService.update(updatePostDto);
     }
 
     @Delete()

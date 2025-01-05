@@ -8,6 +8,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { MetaOption } from "src/meta-options/meta-option.entity";
 import { TagsService } from "src/tags/providers/tags.service";
+import { UpdatePostDto } from "../dtos/updatePost.dto";
 
 @Injectable()
 export class PostsService {
@@ -40,6 +41,25 @@ export class PostsService {
 
         return await this.postRepository.save(post);
     }   
+
+    async update(updatePostDto: UpdatePostDto) {
+        let tags = await this.tagsService.findMultipleTags(updatePostDto.tags);
+
+        let post = await this.postRepository.findOneBy({id: updatePostDto.id});
+
+        post.title = updatePostDto.title ?? post.title;
+        post.content = updatePostDto.content ?? post.content;
+        post.postType = updatePostDto.postType ?? post.postType;
+        post.status = updatePostDto.status ?? post.status;
+        post.slug = updatePostDto.slug ?? post.slug;
+        post.featuredImageUrl = updatePostDto.featuredImageUrl ?? post.featuredImageUrl;
+        post.schema = updatePostDto.schema ?? post.schema;
+        post.publishOn = updatePostDto.publishOn ?? post.publishOn;
+
+        post.tags = tags;
+
+        return await this.postRepository.save(post);
+    }
 
     async delete(id: number) {
 
