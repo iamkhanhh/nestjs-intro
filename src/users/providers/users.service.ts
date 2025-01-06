@@ -1,9 +1,10 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
-import { AuthService } from "src/auth/providers/auth.service";
 import { Repository } from "typeorm";
 import { User } from "../user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUserDto } from "../dtos/create-user.dto";
+import { ConfigService, ConfigType } from "@nestjs/config";
+import profileConfig from "../config/profile.config";
 
 /**
  * Class to connect to Users table in database and perform business operations
@@ -16,8 +17,8 @@ export class UsersService {
      * @param authService 
      */
     constructor(
-        @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
-        @InjectRepository(User) private usersRepository: Repository<User>
+        @InjectRepository(User) private usersRepository: Repository<User>,
+        @Inject(profileConfig.KEY) private readonly profileConfiguration: ConfigType<typeof profileConfig>
     ) {}
 
     /**
@@ -45,8 +46,6 @@ export class UsersService {
      * @returns 
      */
     findAll(limit: number, page: number) {
-        const isAuth = this .authService.isAuth();
-        console.log(isAuth);
 
         return [
             {
