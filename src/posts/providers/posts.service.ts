@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, RequestTimeoutException } from "@nestjs/common";
 import { title } from "process";
 import { stringify } from "querystring";
 import { UsersService } from "src/users/providers/users.service";
@@ -43,9 +43,34 @@ export class PostsService {
     }   
 
     async update(updatePostDto: UpdatePostDto) {
-        let tags = await this.tagsService.findMultipleTags(updatePostDto.tags);
+        let tags = undefined;
+        let post = undefined;
 
-        let post = await this.postRepository.findOneBy({id: updatePostDto.id});
+        try {
+            tags = await this.tagsService.findMultipleTags(updatePostDto.tags);
+        } catch (error) {
+            throw new RequestTimeoutException('Unable to connect to database', {
+                description: 'Please try again later'
+            })
+        }
+
+        if (tags.length === 0) {
+            throw new BadRequestException('Tags not found');
+        } else if (tags.length !== updatePostDto.tags.length || !tags) {
+            throw new BadRequestException('Some tags not found');
+        }
+
+        try {
+            post = await this.postRepository.findOneBy({id: updatePostDto.id});
+        } catch (error) {
+            throw new RequestTimeoutException('Unable to connect to database', {
+                description: 'Please try again later'
+            })
+        }
+
+        if (!post) {
+            throw new BadRequestException('Post not found');
+        }
 
         post.title = updatePostDto.title ?? post.title;
         post.content = updatePostDto.content ?? post.content;
@@ -55,10 +80,16 @@ export class PostsService {
         post.featuredImageUrl = updatePostDto.featuredImageUrl ?? post.featuredImageUrl;
         post.schema = updatePostDto.schema ?? post.schema;
         post.publishOn = updatePostDto.publishOn ?? post.publishOn;
-
         post.tags = tags;
 
-        return await this.postRepository.save(post);
+        try {
+            await this.postRepository.save(post);
+        } catch (error) {
+            throw new RequestTimeoutException('Unable to connect to database', {
+                description: 'Please try again later'
+            })
+        }
+        return post;
     }
 
     async delete(id: number) {

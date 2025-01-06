@@ -1,10 +1,11 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { User } from "../user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUserDto } from "../dtos/create-user.dto";
 import { ConfigService, ConfigType } from "@nestjs/config";
 import profileConfig from "../config/profile.config";
+import { error } from "console";
 
 /**
  * Class to connect to Users table in database and perform business operations
@@ -27,14 +28,29 @@ export class UsersService {
      * @returns 
      */
     async createUser(createUserDto: CreateUserDto) {
-        const existingUser = await this.usersRepository.findOne({ where: { email: createUserDto.email } });
+        let existingUser = undefined;
+
+        try {
+            existingUser = await this.usersRepository.findOne({ where: { email: createUserDto.email } });
+        } catch (error) {
+            throw new RequestTimeoutException('Unable to connect to database', {
+                description: 'Please try again later'
+            });
+        }
 
         if (existingUser) {
-            throw new Error('User already exists');
+            throw new BadRequestException('User already exists, Please use another email');
         }
 
         let newUser = this.usersRepository.create(createUserDto);
-        newUser = await this.usersRepository.save(newUser);
+
+        try {
+            newUser = await this.usersRepository.save(newUser);
+        } catch (error) {
+            throw new RequestTimeoutException('Unable to connect to database', {
+                description: 'Please try again later'
+            });
+        }
 
         return newUser;
     }
@@ -46,17 +62,18 @@ export class UsersService {
      * @returns 
      */
     findAll(limit: number, page: number) {
-
-        return [
-            {
-                firstName: 'Khanh',
-                email: 'khanh9102004@gmail.com'
-            },
-            {
-                firstName: 'Chi',
-                email: 'mailinhchi2107@gmail.com'
-            }
-        ]
+        throw new HttpException({
+            status: HttpStatus.MOVED_PERMANENTLY,
+            error: 'This endpoint is not enabled',
+            fileName: 'users.service.ts',
+            lineNumber: 70
+        }, 
+        HttpStatus.MOVED_PERMANENTLY,
+        {
+            cause: new Error('This endpoint is not enabled'),
+            description: 'This endpoint is not enabled'
+        }
+    );
     }
 
     /**
@@ -65,6 +82,20 @@ export class UsersService {
      * @returns 
      */
     async findOneByID(id: number) {
-        return  await this.usersRepository.findOneBy({id});
+        let user = undefined;
+
+        try {
+            user = await this.usersRepository.findOne({ where: { id } });
+        } catch (error) {
+            throw new RequestTimeoutException('Unable to connect to database', {
+                description: 'Please try again later'
+            });
+        }
+
+        if (!user) {
+            throw new BadRequestException('User is not found');
+        }
+
+        return  user;
     }
 }
