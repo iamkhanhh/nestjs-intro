@@ -3,6 +3,7 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { PatchUserDto } from './dtos/patch-user.dto';
 import { UsersService } from './providers/users.service';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { CreateUsersDto } from './dtos/create-many-users.dto';
 
 @Controller('users')
 export class UsersController {
@@ -66,5 +67,13 @@ export class UsersController {
         @Body() patchUserDto: PatchUserDto
     ) {
         return 'you send a get request to users endpoints'
+    }
+
+    @Post('create-many-users')
+    public createManyUsers(
+        @Body() createUsersDto: CreateUsersDto
+    ) {
+        console.log(createUsersDto)
+        return this.usersService.createMany(createUsersDto);
     }
 }
