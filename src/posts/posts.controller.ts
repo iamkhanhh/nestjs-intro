@@ -3,6 +3,7 @@ import { PostsService } from './providers/posts.service';
 import { CreatePostDto } from './dtos/createPost.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UpdatePostDto } from './dtos/updatePost.dto';
+import { GetPostsDto } from './dtos/get-posts.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -12,9 +13,11 @@ export class PostsController {
 
     @Get('/:userId?')
     getPosts(
-        @Param('userId') userId: string
+        @Param('userId') userId: string,
+        @Query() postQuery: GetPostsDto
     ) {
-        return this.postsService.findAll(userId);
+        console.log(postQuery);
+        return this.postsService.findAll(userId, postQuery);
     }
 
     @ApiOperation({

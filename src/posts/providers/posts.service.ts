@@ -9,6 +9,9 @@ import { Repository } from "typeorm";
 import { MetaOption } from "src/meta-options/meta-option.entity";
 import { TagsService } from "src/tags/providers/tags.service";
 import { UpdatePostDto } from "../dtos/updatePost.dto";
+import { GetPostsDto } from "../dtos/get-posts.dto";
+import { take } from "rxjs";
+import { PaginationProvider } from "src/common/pagination/providers/pagination.provider";
 
 @Injectable()
 export class PostsService {
@@ -16,14 +19,16 @@ export class PostsService {
     constructor(
         private readonly usersService: UsersService,
         private readonly tagsService: TagsService,
+        private readonly paginationProvider: PaginationProvider,
         @InjectRepository(Post) private readonly postRepository: Repository<Post>,
         @InjectRepository(MetaOption) private readonly metaOptionRepository: Repository<MetaOption>,
     ) {}
 
-    async findAll(userId: string) {
-        let posts = await this.postRepository.find({
-            relations: ['metaOptions'],
-        });
+    async findAll(userId: string, postQuery: GetPostsDto) {
+        let posts = await this.paginationProvider.paginateQuery({
+            limit: postQuery.limit,
+            page: postQuery.page
+        }, this.postRepository);
 
         return posts;
     }
