@@ -1,4 +1,4 @@
-import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException } from "@nestjs/common";
+import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException, UnauthorizedException } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { User } from "../user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -7,6 +7,7 @@ import { ConfigService, ConfigType } from "@nestjs/config";
 import profileConfig from "../config/profile.config";
 import { UsersCreateManyProvider } from "./users-create-many.provider";
 import { CreateUsersDto } from "../dtos/create-many-users.dto";
+import { CreateUserProvider } from "./create-user.provider";
 
 /**
  * Class to connect to Users table in database and perform business operations
@@ -21,7 +22,8 @@ export class UsersService {
     constructor(
         @InjectRepository(User) private usersRepository: Repository<User>,
         @Inject(profileConfig.KEY) private readonly profileConfiguration: ConfigType<typeof profileConfig>,
-        private readonly usersCreateManyProvider: UsersCreateManyProvider
+        private readonly usersCreateManyProvider: UsersCreateManyProvider,
+        private readonly createUserProvider: CreateUserProvider,
     ) {}
 
     /**
@@ -30,31 +32,7 @@ export class UsersService {
      * @returns 
      */
     async createUser(createUserDto: CreateUserDto) {
-        let existingUser = undefined;
-
-        try {
-            existingUser = await this.usersRepository.findOne({ where: { email: createUserDto.email } });
-        } catch (error) {
-            throw new RequestTimeoutException('Unable to connect to database', {
-                description: 'Please try again later'
-            });
-        }
-
-        if (existingUser) {
-            throw new BadRequestException('User already exists, Please use another email');
-        }
-
-        let newUser = this.usersRepository.create(createUserDto);
-
-        try {
-            newUser = await this.usersRepository.save(newUser);
-        } catch (error) {
-            throw new RequestTimeoutException('Unable to connect to database', {
-                description: 'Please try again later'
-            });
-        }
-
-        return newUser;
+        return await this.createUserProvider.createUser(createUserDto);
     }
 
     /**
@@ -96,6 +74,24 @@ export class UsersService {
 
         if (!user) {
             throw new BadRequestException('User is not found');
+        }
+
+        return  user;
+    }
+
+    async findOneByEmail(email: string) {
+        let user: User | undefined = undefined;
+
+        try {
+            user = await this.usersRepository.findOneBy({ email });
+        } catch (error) {
+            throw new RequestTimeoutException('Unable to connect to database', {
+                description: 'Please try again later'
+            });
+        }
+
+        if (!user) {
+            throw new UnauthorizedException('Email is not exist!')
         }
 
         return  user;
