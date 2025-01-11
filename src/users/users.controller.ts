@@ -4,6 +4,8 @@ import { PatchUserDto } from './dtos/patch-user.dto';
 import { UsersService } from './providers/users.service';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { CreateUsersDto } from './dtos/create-many-users.dto';
+import { Auth } from 'src/auth/decoratos/auth.decorator';
+import { AuthType } from 'src/auth/enums/auth-type.enum';
 
 @Controller('users')
 export class UsersController {
@@ -55,6 +57,7 @@ export class UsersController {
     }
 
     @Post()
+    @Auth(AuthType.None)
     public createUsers(
         @Body() createUserDto: CreateUserDto
     ) {

@@ -10,8 +10,9 @@ import { MetaOption } from "src/meta-options/meta-option.entity";
 import { TagsService } from "src/tags/providers/tags.service";
 import { UpdatePostDto } from "../dtos/updatePost.dto";
 import { GetPostsDto } from "../dtos/get-posts.dto";
-import { take } from "rxjs";
 import { PaginationProvider } from "src/common/pagination/providers/pagination.provider";
+import { ActiveUserData } from "src/auth/interfaces/active-user.interface";
+import { CreatePostProvider } from "./create-post.provider";
 
 @Injectable()
 export class PostsService {
@@ -20,8 +21,9 @@ export class PostsService {
         private readonly usersService: UsersService,
         private readonly tagsService: TagsService,
         private readonly paginationProvider: PaginationProvider,
+        private readonly createPostProvider: CreatePostProvider,
         @InjectRepository(Post) private readonly postRepository: Repository<Post>,
-        @InjectRepository(MetaOption) private readonly metaOptionRepository: Repository<MetaOption>,
+        @InjectRepository(MetaOption) private readonly metaOptionRepository: Repository<MetaOption>
     ) {}
 
     async findAll(userId: string, postQuery: GetPostsDto) {
@@ -33,18 +35,9 @@ export class PostsService {
         return posts;
     }
 
-    async create(createPostDto: CreatePostDto) {
-        let author = await this.usersService.findOneByID(createPostDto.authorId);
+    async create(createPostDto: CreatePostDto, user: ActiveUserData) {
 
-        let tags = await this.tagsService.findMultipleTags(createPostDto.tags);
-
-        let post = this.postRepository.create({
-            ...createPostDto, 
-            author,
-            tags
-        });
-
-        return await this.postRepository.save(post);
+        return await this.createPostProvider.create(createPostDto, user);
     }   
 
     async update(updatePostDto: UpdatePostDto) {
