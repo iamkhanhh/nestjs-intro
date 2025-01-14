@@ -8,6 +8,8 @@ import profileConfig from "../config/profile.config";
 import { UsersCreateManyProvider } from "./users-create-many.provider";
 import { CreateUsersDto } from "../dtos/create-many-users.dto";
 import { CreateUserProvider } from "./create-user.provider";
+import { CreateGoogleUserProvider } from "./create-google-user.provider";
+import { GoogleUser } from "../interfaces/goggle-user.interface";
 
 /**
  * Class to connect to Users table in database and perform business operations
@@ -24,6 +26,7 @@ export class UsersService {
         @Inject(profileConfig.KEY) private readonly profileConfiguration: ConfigType<typeof profileConfig>,
         private readonly usersCreateManyProvider: UsersCreateManyProvider,
         private readonly createUserProvider: CreateUserProvider,
+        private readonly createGoogleUserProvider: CreateGoogleUserProvider
     ) {}
 
     /**
@@ -99,5 +102,13 @@ export class UsersService {
 
     async createMany(createUsersDto: CreateUsersDto) {
         return await this.usersCreateManyProvider.createMany(createUsersDto);
+    }
+
+    async findOneByGoogleId(googleId: string) {
+        return await this.usersRepository.findOneBy({ googleId })
+    }
+
+    async createGoogleUser(GoogleUser: GoogleUser) {
+        return await this.createGoogleUserProvider.createGoogleUser(GoogleUser);
     }
 }

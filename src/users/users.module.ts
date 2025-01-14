@@ -7,6 +7,7 @@ import { User } from './user.entity';
 import { ConfigModule } from '@nestjs/config';
 import { UsersCreateManyProvider } from './providers/users-create-many.provider';
 import { CreateUserProvider } from './providers/create-user.provider';
+import { CreateGoogleUserProvider } from './providers/create-google-user.provider';
 import profileConfig from './config/profile.config';
 
 @Module({
@@ -16,7 +17,7 @@ import profileConfig from './config/profile.config';
         ConfigModule.forFeature(profileConfig)
     ],
     controllers: [UsersController],
-    providers: [UsersService, UsersCreateManyProvider, CreateUserProvider],
+    providers: [UsersService, UsersCreateManyProvider, CreateUserProvider, CreateGoogleUserProvider],
     exports: [UsersService]
 })
 export class UsersModule {}
