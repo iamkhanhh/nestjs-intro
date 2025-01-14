@@ -2,7 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { DataResponseInterceptor } from './common/interceptors/data-response/data-response.interceptor';
+import { config } from 'aws-sdk';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,15 +19,26 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
+  const SwaggerConfig = new DocumentBuilder()
     .setTitle('NestJS example')
     .setDescription('The NestJS API')
     .setTermsOfService('http://localhost:3000/terms-of-service')
     .addServer('http://localhost:3000')
     .setVersion('1.0')
     .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  const documentFactory = () => SwaggerModule.createDocument(app, SwaggerConfig);
   SwaggerModule.setup('api', app, documentFactory);
+
+  const configService = app.get(ConfigService);
+  config.update({
+    credentials: {
+      accessKeyId: configService.get<string>('appConfig.awsAccessKeyId'),
+      secretAccessKey: configService.get<string>(
+        'appConfig.awsSecretAccessKey',
+      ),
+    },
+    region: configService.get<string>('appConfig.awsRegion'),
+  });
 
   app.enableCors();
 
