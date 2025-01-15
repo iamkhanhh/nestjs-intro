@@ -23,7 +23,6 @@ export class UsersService {
      */
     constructor(
         @InjectRepository(User) private usersRepository: Repository<User>,
-        @Inject(profileConfig.KEY) private readonly profileConfiguration: ConfigType<typeof profileConfig>,
         private readonly usersCreateManyProvider: UsersCreateManyProvider,
         private readonly createUserProvider: CreateUserProvider,
         private readonly createGoogleUserProvider: CreateGoogleUserProvider
