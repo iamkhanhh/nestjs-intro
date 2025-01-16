@@ -13,3 +13,6 @@ export default new DataSource({
 
 // generate migration command
 // npx typeorm migration:generate src/migrations/firstMigration -d dist/typeorm-cli.config
+
+// run migration command
+// npx typeorm migration:run -d dist/typeorm-cli.config
